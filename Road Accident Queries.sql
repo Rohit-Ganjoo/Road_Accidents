@@ -1,6 +1,32 @@
 use roadaccidents;
 show tables;
-select `Accident Date` from roadrash;
+
+
+-- Check for the Accident Severity and do the necessary changes in the table:
+select distinct Accident_Severity from roadrash;
+update roadrash
+set Accident_Severity = replace(Accident_Severity, 'Fetal', 'Fatal');
+update roadrash
+set Accident_Severity = replace(Accident_Severity, 'Slight', 'Minor');
+
+-- Average number of Casulaties in accidents:
+
+
+
+-- Check how much each Category contributes to the Total accidents. Show the Percentage Contribution for each category.
+
+select Accident_Severity,`Accidents per Severity`,
+      concat(round((`Accidents per Severity` / `Total Accidents`)*100,2)," %") as `Percent Contribution`
+from (
+    select Accident_Severity, count(*) as `Accidents per Severity`,
+    (Select count(*) from roadrash) as `Total Accidents`
+    from roadrash
+    group by  1
+) x
+order by 2 desc;
+
+
+-- Display the Month on Month change in the Accident Rate, along with that display the Current Month Accidents and Previous Month Accidents. 
 with Accident_Monthly_Comparison as 
 (
 select *,
@@ -18,9 +44,8 @@ order by `Month Number`
 )
 
 select *,
-concat(round(((`Current Month Accident`-`Previous Month Accident`)/ `Current Month Accident`) * 100,2)," %" )as Percentage_Increase
- from Accident_Monthly_Comparison;
-
+ifnull(concat(round(((`Current Month Accident`-`Previous Month Accident`)/`Current Month Accident`) * 100,2)," %" ),'No Value') as Percentage_Increase
+from Accident_Monthly_Comparison;
 
 
 
