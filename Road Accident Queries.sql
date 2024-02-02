@@ -2,13 +2,6 @@ use roadaccidents;
 show tables;
 
 
--- Check for the Accident Severity and do the necessary changes in the table:
-select distinct Accident_Severity from roadrash;
-update roadrash
-set Accident_Severity = replace(Accident_Severity, 'Fetal', 'Fatal');
-update roadrash
-set Accident_Severity = replace(Accident_Severity, 'Slight', 'Minor');
-
 -- Average number of Casulaties in accidents:
 
 
