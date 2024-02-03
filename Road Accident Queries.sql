@@ -153,5 +153,80 @@ order by 1
 )x
 GROUP BY 1;
 
+-- Weather Impact
+-- Check if the weather condition has impact on the accident rates and which weather condition associated with higher accidents numbers
+SELECT Weather_Conditions,
+       count(*) as `Total Accidents`,
+       sum(Number_of_Casualties) as `Total Casualties`
+FROM roadrash
+group by 1
+order by 2 DESC;
 
-select distinct Road_Surface_Conditions from roadrash;
+
+-- Display the Day-wise total accidents happen in Rural and Urban area: 
+SELECT `No`, 
+        Day,
+        SUM(case when Urban_or_Rural_Area = 'Urban' THEN `Total Accidents` Else 0 END) as 'Urban',
+        SUM(case when Urban_or_Rural_Area = 'Rural' THEN `Total Accidents` Else 0 END)as 'Rural'
+from 
+(
+SELECT
+    CASE WHEN Day_of_Week='Sunday' THEN 1
+        WHEN Day_of_Week='Monday' THEN 2
+        WHEN Day_of_Week='Tuesday' THEN 3
+        WHEN Day_of_Week='Wednesday' THEN 4
+        WHEN Day_of_Week='Thursday' THEN 5
+        WHEN Day_of_Week='Friday' THEN 6
+        WHEN Day_of_Week='Saturday' THEN 7
+    END as `No`,
+    Urban_or_Rural_Area, 
+    Day_of_Week as `Day`,
+    COUNT(*) AS `Total Accidents`
+FROM
+    roadrash
+GROUP BY
+    1, 2,3
+ORDER BY 2,1
+) day_area
+group by 1,2
+order by 1;
+
+
+-- Window Function Ranking:
+-- Rank the top 3 police forces with the highest average number of casualties per accident.
+
+SELECT `Police Force`, `Number of Casualties`
+from
+(
+SELECT 
+    police_force AS `Police Force`,
+    SUM(Number_of_Casualties) AS `Number of Casualties`,
+    ROW_NUMBER() OVER (PARTITION BY police_force ORDER BY SUM(Number_of_Casualties) DESC) AS Police_Rank
+FROM roadrash
+GROUP BY 1
+ORDER BY 1
+LIMIT 3
+)x;
+
+
+
+
+
+-- Regular Expression Filtering:
+-- Extract and analyze accidents occurring in urban areas during the evening (5 PM to 8 PM).
+
+
+Select Urban_or_Rural_Area as 'Region',
+sum(case when Time > '00:00' and Time < '12:00' then `Number of Accidents` else 0 end) as 'Morning Time',
+sum(case when Time >= '12:00' and Time < '17:00' then `Number of Accidents` else 0 end) as 'Afternoon Time',
+sum(case when Time >= '17:00' and Time <= '23:59' then `Number of Accidents` else 0 end) as 'Evening Time'
+from
+(
+select Time, Urban_or_Rural_Area, count(*) as `Number of Accidents`
+from roadrash
+group by 1,2
+order by 1)x
+Group by 1;
+-- Temporal Window Function:
+
+-- Calculate the rolling average of the number of casualties over a 7-day window for each day of the week.
