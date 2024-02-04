@@ -14,7 +14,9 @@ FROM roadrash
 GROUP BY 1
 ORDER BY 2 DESC
 LIMIT 10;
+
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/326.png)
 ## Temporal Analysis:
 ### 1. Display the Month on Month change in the Accident Rate, along with that display the Current Month Accidents and Previous Month Accidents.
 ``` sql 
@@ -38,6 +40,7 @@ SELECT *,
     IFNULL(CONCAT(ROUND(((`Current Month Accident` - `Previous Month Accident`) / `Previous Month Accident`) * 100, 2), " %"), 'No Record') AS Percentage_Increase
 FROM Accident_Monthly_Comparison;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/327.png)
 ###  2. Number of Casualties in each Quarters of each year, and give the percentage change to the consecutive quarter:
 ``` sql WITH QuarterCasualties
 AS (
@@ -59,6 +62,7 @@ SELECT Quarter,
     CONCAT (ROUND(((`Total Casualties` - Prev_Quarter) / Prev_Quarter * 100), 2), " %") AS `Percentage Change`
 FROM QuarterCasualties;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/328.png)
 ### 3. Side by side comparison of Total Casualties for different years Quarter wise:
 ``` sql
 SELECT 
@@ -83,6 +87,7 @@ INNER JOIN (
 ) b ON a.Quarter = b.Quarter AND a.Year = b.Year + 1
 ORDER BY a.Year, a.Quarter;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/329.png)
 ## Severity Analysis
 ### 1. Check how much each severity contributes to the total accident, also display how much percent each severity accounts for total accidents.
 ``` sql 
@@ -100,6 +105,7 @@ FROM (
 ) x
 ORDER BY 2 DESC; 
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/330.png)
 ### 2. Display which Road types contribute to a greater number of accidents.
 ``` sql
 SELECT 
@@ -116,6 +122,7 @@ FROM (
 ) x
 ORDER BY 2 DESC; 
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/331.png)
 ### 3. Display which Road surface condition contributes to more number of accidents:
 ``` sql
 SELECT 
@@ -132,6 +139,7 @@ FROM (
 ) x
 ORDER BY 2 DESC; 
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/332.png)
 ## Junction Analysis:
 ### 1. Using the pivot, make a table with Junction detail as index (Row) and Junction Control as Column and value is the Number of Accidents.
 ``` sql
@@ -154,6 +162,7 @@ FROM (
 ) x
 GROUP BY 1;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/333.png)
 ## Road Surface Conditions VS Vehicle Types:
 ### 1. Display the Pivot Table that shows the index 
 ``` sql
@@ -176,6 +185,7 @@ FROM (
 ) x
 GROUP BY 1;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/334.png)
 ## Weather Impact
 ### 1. Check if the weather condition has an impact on the accident rates and which weather condition is associated with higher accident numbers
 ``` sql
@@ -187,6 +197,7 @@ FROM roadrash
 GROUP BY 1
 ORDER BY 2 DESC;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/335.png)
 ### 1. Display the Day-wise total accidents happening in Rural and Urban areas: 
 ``` sql
 SELECT 
@@ -215,6 +226,7 @@ FROM (
 GROUP BY 1,2
 ORDER BY 1;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/336.png)
 ## Window Function Ranking:
 ### 1. Rank the top 3 police forces with the highest average number of casualties per accident.
 ``` sql
@@ -232,7 +244,7 @@ ORDER BY 3
 WHERE Police_Rank <= 3
 ORDER BY Police_Rank;
 ```
-
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/338.png)
 
 
 ## Temporal Window Function:
@@ -256,6 +268,7 @@ SELECT
 FROM MonthCasualties
 ORDER BY 2, `No`;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/339.png)
 ## Categorical Analysis:
 
 ### 1. Display number of accidents happen in Urban and Rural region separately at different periods in a day.
@@ -276,6 +289,7 @@ FROM (
 ) x
 GROUP BY 1;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/340.png)
  ### 2. Categorizing the Accident Type based on Accident Severity, Number of Casualties, and Number of Vehicles:
 ``` sql
 SELECT `Accident Intensity`, COUNT(*) AS `Accidents`,
@@ -312,6 +326,7 @@ FROM roadrash
 GROUP BY 1
 ORDER BY 2 DESC;
 ```
+![Output:](https://github.com/Rohit-Ganjoo/Road_Accidents/blob/main/Result%20Snapshots/341.png)
 
 
 ```
