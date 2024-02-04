@@ -218,8 +218,8 @@ ORDER BY 1;
 ## Window Function Ranking:
 ### 1. Rank the top 3 police forces with the highest average number of casualties per accident.
 ``` sql
-select Police_Rank as `Police Ranking`, `Police Force`, `Number of Casualties`
-from 
+SELECT Police_Rank AS `Police Ranking`, `Police Force`, `Casualties per Accident`
+FROM
 (
 SELECT 
     police_force AS `Police Force`,
@@ -229,8 +229,8 @@ FROM roadrash
 GROUP BY 1
 ORDER BY 3
 )x
-where Police_Rank <= 3
-order by Police_Rank;
+WHERE Police_Rank <= 3
+ORDER BY Police_Rank;
 ```
 
 
