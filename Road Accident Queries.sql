@@ -1,4 +1,3 @@
-use roadaccidents;
 -- Spatial Analysis
 -- Top 10 Districts that have high accidents:
 SELECT `Local_Authority_(District)`, count(*)
@@ -194,21 +193,21 @@ order by 1;
 
 
 -- Window Function Ranking:
--- Rank the top 3 police forces with the highest average number of casualties per accident.
+-- Rank the top 3 police forces with the highest number of casualties per accident.
 
-select Police_Rank as `Police Ranking`, `Police Force`, `Number of Casualties`
-from 
+SELECT Police_Rank AS `Police Ranking`, `Police Force`, `Casualties per Accident`
+FROM
 (
 SELECT 
     police_force AS `Police Force`,
-    SUM(Number_of_Casualties) AS `Number of Casualties`,
-    ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties) DESC) AS Police_Rank
+    SUM(Number_of_Casualties)/COUNT(*) AS `Casualties per Accident`,
+    ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties)/COUNT(*) DESC) AS Police_Rank
 FROM roadrash
 GROUP BY 1
 ORDER BY 3
 )x
-where Police_Rank <= 3
-order by Police_Rank;
+WHERE Police_Rank <= 3
+ORDER BY Police_Rank;
 
 
 
@@ -258,7 +257,7 @@ ORDER BY
 
 
 -- Catagorising the Accident Type on the basis of Accident Severity, Number of Casualties, and Number of Vehicles:
-select `Accident Intensity`, count(*) as `Accidents`,carriageway_Hazards,
+select `Accident Intensity`, count(*) as `Accidents`,
         sum(Number_of_Casualties) as  `Casualties`,
         sum(Number_of_Vehicles) as `Vehicles involved`
 from
@@ -267,7 +266,6 @@ SELECT
     Accident_Severity,
     Number_of_Casualties,
     Number_of_Vehicles,
-    carriageway_Hazards,
     CASE
         WHEN Number_of_Casualties BETWEEN 0 AND 0 AND Number_of_Vehicles BETWEEN 1 AND 2 THEN 'Minor Incidents'
         WHEN Number_of_Casualties BETWEEN 0 AND 1 AND Number_of_Vehicles BETWEEN 2 AND 3 THEN 'Moderate Collisions'
@@ -290,6 +288,6 @@ SELECT
     END AS `Accident Intensity`
 FROM roadrash
 )x
-Group by 1,3
+Group by 1
 order by 2 desc;
 
