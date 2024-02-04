@@ -1,7 +1,9 @@
 
 # Road Accidents Analysis:
--- Use the database 
+ Use the database 
+
 ``` sql
+
 USE roadaccidents;
 ```
 ## Spatial Analysis
@@ -216,21 +218,19 @@ ORDER BY 1;
 ## Window Function Ranking:
 ### 1. Rank the top 3 police forces with the highest average number of casualties per accident.
 ``` sql
+select Police_Rank as `Police Ranking`, `Police Force`, `Number of Casualties`
+from 
+(
 SELECT 
-    Police_Rank as `Police Ranking`, 
-    `Police Force`, 
-    `Number of Casualties`
-FROM (
-    SELECT 
-        police_force AS `Police Force`,
-        SUM(Number_of_Casualties) AS `Number of Casualties`,
-        ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties) DESC) AS Police_Rank
-    FROM roadrash
-    GROUP BY 1
-    ORDER BY 3
-) x
-WHERE Police_Rank <= 3
-ORDER BY Police_Rank;
+    police_force AS `Police Force`,
+    SUM(Number_of_Casualties)/COUNT(*) AS `Casualties per Accident`,
+    ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties)/COUNT(*) DESC) AS Police_Rank
+FROM roadrash
+GROUP BY 1
+ORDER BY 3
+)x
+where Police_Rank <= 3
+order by Police_Rank;
 ```
 
 
