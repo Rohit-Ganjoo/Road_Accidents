@@ -1,7 +1,9 @@
 
 # Road Accidents Analysis:
--- Use the database 
+ Use the database 
+
 ``` sql
+
 USE roadaccidents;
 ```
 ## Spatial Analysis
@@ -145,7 +147,7 @@ FROM (
     SELECT  
         Junction_Control, 
         Junction_Detail, 
-        COUNT(*) as `Number of Accidents` 
+        COUNT(*) AS `Number of Accidents` 
     FROM roadrash
     GROUP BY 1,2
     ORDER BY 1
@@ -179,8 +181,8 @@ GROUP BY 1;
 ``` sql
 SELECT 
     Weather_Conditions,
-    COUNT(*) as `Total Accidents`,
-    SUM(Number_of_Casualties) as `Total Casualties`
+    COUNT(*) AS `Total Accidents`,
+    SUM(Number_of_Casualties) AS `Total Casualties`
 FROM roadrash
 GROUP BY 1
 ORDER BY 2 DESC;
@@ -190,8 +192,8 @@ ORDER BY 2 DESC;
 SELECT 
     `No`, 
     Day,
-    SUM(CASE WHEN Urban_or_Rural_Area = 'Urban' THEN `Total Accidents` ELSE 0 END) as 'Urban',
-    SUM(CASE WHEN Urban_or_Rural_Area = 'Rural' THEN `Total Accidents` ELSE 0 END) as 'Rural'
+    SUM(CASE WHEN Urban_or_Rural_Area = 'Urban' THEN `Total Accidents` ELSE 0 END) AS 'Urban',
+    SUM(CASE WHEN Urban_or_Rural_Area = 'Rural' THEN `Total Accidents` ELSE 0 END) AS 'Rural'
 FROM (
     SELECT
         CASE 
@@ -202,9 +204,9 @@ FROM (
             WHEN Day_of_Week='Thursday' THEN 5
             WHEN Day_of_Week='Friday' THEN 6
             WHEN Day_of_Week='Saturday' THEN 7
-        END as `No`,
+        END AS `No`,
         Urban_or_Rural_Area, 
-        Day_of_Week as `Day`,
+        Day_of_Week AS `Day`,
         COUNT(*) AS `Total Accidents`
     FROM roadrash
     GROUP BY 1, 2, 3
@@ -216,19 +218,17 @@ ORDER BY 1;
 ## Window Function Ranking:
 ### 1. Rank the top 3 police forces with the highest average number of casualties per accident.
 ``` sql
+SELECT Police_Rank AS `Police Ranking`, `Police Force`, `Casualties per Accident`
+FROM
+(
 SELECT 
-    Police_Rank as `Police Ranking`, 
-    `Police Force`, 
-    `Number of Casualties`
-FROM (
-    SELECT 
-        police_force AS `Police Force`,
-        SUM(Number_of_Casualties) AS `Number of Casualties`,
-        ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties) DESC) AS Police_Rank
-    FROM roadrash
-    GROUP BY 1
-    ORDER BY 3
-) x
+    police_force AS `Police Force`,
+    SUM(Number_of_Casualties)/COUNT(*) AS `Casualties per Accident`,
+    ROW_NUMBER() OVER (ORDER BY SUM(Number_of_Casualties)/COUNT(*) DESC) AS Police_Rank
+FROM roadrash
+GROUP BY 1
+ORDER BY 3
+)x
 WHERE Police_Rank <= 3
 ORDER BY Police_Rank;
 ```
@@ -261,10 +261,10 @@ ORDER BY 2, `No`;
 ### 1. Display number of accidents happen in Urban and Rural region separately at different periods in a day.
 ``` sql
 SELECT 
-    Urban_or_Rural_Area as 'Region',
-    SUM(CASE WHEN Time > '00:00' AND Time < '12:00' THEN `Number of Accidents` ELSE 0 END) as 'Morning Time',
-    SUM(CASE WHEN Time >= '12:00' AND Time < '17:00' THEN `Number of Accidents` ELSE 0 END) as 'Afternoon Time',
-    SUM(CASE WHEN Time >= '17:00' AND Time <= '23:59' THEN `Number of Accidents` ELSE 0 END) as 'Evening Time'
+    Urban_or_Rural_Area AS 'Region',
+    SUM(CASE WHEN Time > '00:00' AND Time < '12:00' THEN `Number of Accidents` ELSE 0 END) AS 'Morning Time',
+    SUM(CASE WHEN Time >= '12:00' AND Time < '17:00' THEN `Number of Accidents` ELSE 0 END) AS 'Afternoon Time',
+    SUM(CASE WHEN Time >= '17:00' AND Time <= '23:59' THEN `Number of Accidents` ELSE 0 END) AS 'Evening Time'
 FROM (
     SELECT 
         Time, 
@@ -278,41 +278,38 @@ GROUP BY 1;
 ```
  ### 2. Categorizing the Accident Type based on Accident Severity, Number of Casualties, and Number of Vehicles:
 ``` sql
+SELECT `Accident Intensity`, COUNT(*) AS `Accidents`,
+        SUM(Number_of_Casualties) AS  `Casualties`,
+        SUM(Number_of_Vehicles) AS `Vehicles involved`
+FROM
+(
 SELECT 
-    `Accident Intensity`, 
-    COUNT(*) AS `Accidents`,
-    carriageway_Hazards,
-    SUM(Number_of_Casualties) AS `Casualties`,
-    SUM(Number_of_Vehicles) AS `Vehicles involved`
-FROM (
-    SELECT 
-        Accident_Severity,
-        Number_of_Casualties,
-        Number_of_Vehicles,
-        carriageway_Hazards,
-        CASE
-            WHEN Number_of_Casualties BETWEEN 0 AND 0 AND Number_of_Vehicles BETWEEN 1 AND 2 THEN 'Minor Incidents'
-            WHEN Number_of_Casualties BETWEEN 0 AND 1 AND Number_of_Vehicles BETWEEN 2 AND 3 THEN 'Moderate Collisions'
-            WHEN Number_of_Casualties BETWEEN 1 AND 2 AND Number_of_Vehicles BETWEEN 1 AND 3 THEN 'Severe Crashes'
-            WHEN Number_of_Casualties BETWEEN 3 AND 8 AND Number_of_Vehicles BETWEEN 1 AND 6 THEN 'Fatal Accidents'
-            WHEN Number_of_Casualties BETWEEN 5 AND 15 AND Number_of_Vehicles BETWEEN 3 AND 10 THEN 'Multi-Vehicle Collisions'
-            WHEN Number_of_Casualties BETWEEN 0 AND 2 AND Number_of_Vehicles BETWEEN 1 AND 2 THEN 'Single-Vehicle Incidents'
-            WHEN Number_of_Casualties BETWEEN 0 AND 1 AND Number_of_Vehicles BETWEEN 1 AND 5 THEN 'Property Damage Only'
-            WHEN Number_of_Casualties BETWEEN 0 AND 2 AND Number_of_Vehicles BETWEEN 3 AND 7 THEN 'Major Traffic Incidents'
-            WHEN Number_of_Casualties BETWEEN 0 AND 6 AND Number_of_Vehicles BETWEEN 2 AND 8 THEN 'Intersection Accidents'
-            WHEN Number_of_Casualties BETWEEN 2 AND 12 AND Number_of_Vehicles BETWEEN 2 AND 10 THEN 'Highway Crashes'
-            WHEN Number_of_Casualties BETWEEN 8 AND 21 AND Number_of_Vehicles BETWEEN 3 AND 12 THEN 'High Casualty Intersection'
-            WHEN Number_of_Casualties BETWEEN 15 AND 27 AND Number_of_Vehicles BETWEEN 8 AND 19 THEN 'Major Highway Carnage'
-            WHEN Number_of_Casualties >= 27 AND Number_of_Vehicles >= 19 THEN 'Massive Pileup'
-            WHEN Number_of_Casualties BETWEEN 10 AND 27 AND Number_of_Vehicles BETWEEN 4 AND 9 THEN 'Pedestrian Disaster'
-            WHEN Number_of_Casualties BETWEEN 15 AND 27 AND Number_of_Vehicles BETWEEN 13 AND 19 THEN 'Catastrophic Rollover'
-            WHEN Number_of_Casualties BETWEEN 24 AND 27 AND Number_of_Vehicles BETWEEN 8 AND 12 THEN 'Bus Catastrophe'
-            WHEN Number_of_Casualties BETWEEN 19 AND 27 AND Number_of_Vehicles BETWEEN 1 AND 4 THEN 'Train Collision'
-            ELSE 'Unknown Intensity'
-        END AS `Accident Intensity`
-    FROM roadrash
-) x
-GROUP BY 1,3
+    Accident_Severity,
+    Number_of_Casualties,
+    Number_of_Vehicles,
+    CASE
+        WHEN Number_of_Casualties BETWEEN 0 AND 0 AND Number_of_Vehicles BETWEEN 1 AND 2 THEN 'Minor Incidents'
+        WHEN Number_of_Casualties BETWEEN 0 AND 1 AND Number_of_Vehicles BETWEEN 2 AND 3 THEN 'Moderate Collisions'
+        WHEN Number_of_Casualties BETWEEN 1 AND 2 AND Number_of_Vehicles BETWEEN 1 AND 3 THEN 'Severe Crashes'
+        WHEN Number_of_Casualties BETWEEN 3 AND 8 AND Number_of_Vehicles BETWEEN 1 AND 6 THEN 'Fatal Accidents'
+        WHEN Number_of_Casualties BETWEEN 5 AND 15 AND Number_of_Vehicles BETWEEN 3 AND 10 THEN 'Multi-Vehicle Collisions'
+        WHEN Number_of_Casualties BETWEEN 0 AND 2 AND Number_of_Vehicles BETWEEN 1 AND 2 THEN 'Single-Vehicle Incidents'
+        WHEN Number_of_Casualties BETWEEN 0 AND 1 AND Number_of_Vehicles BETWEEN 1 AND 5 THEN 'Property Damage Only'
+        WHEN Number_of_Casualties BETWEEN 0 AND 2 AND Number_of_Vehicles BETWEEN 3 AND 7 THEN 'Major Traffic Incidents'
+        WHEN Number_of_Casualties BETWEEN 0 AND 6 AND Number_of_Vehicles BETWEEN 2 AND 8 THEN 'Intersection Accidents'
+        WHEN Number_of_Casualties BETWEEN 2 AND 12 AND Number_of_Vehicles BETWEEN 2 AND 10 THEN 'Highway Crashes'
+        WHEN Number_of_Casualties BETWEEN 8 AND 21 AND Number_of_Vehicles BETWEEN 3 AND 12 THEN 'High Casualty Intersection'
+        WHEN Number_of_Casualties BETWEEN 15 AND 27 AND Number_of_Vehicles BETWEEN 8 AND 19 THEN 'Major Highway Carnage'
+        WHEN Number_of_Casualties >= 27 AND Number_of_Vehicles >= 19 THEN 'Massive Pileup'
+        WHEN Number_of_Casualties BETWEEN 10 AND 27 AND Number_of_Vehicles BETWEEN 4 AND 9 THEN 'Pedestrian Disaster'
+        WHEN Number_of_Casualties BETWEEN 15 AND 27 AND Number_of_Vehicles BETWEEN 13 AND 19 THEN 'Catastrophic Rollover'
+        WHEN Number_of_Casualties BETWEEN 24 AND 27 AND Number_of_Vehicles BETWEEN 8 AND 12 THEN 'Bus Catastrophe'
+        WHEN Number_of_Casualties BETWEEN 19 AND 27 AND Number_of_Vehicles BETWEEN 1 AND 4 THEN 'Train Collision'
+        ELSE 'Unknown Intensity'
+    END AS `Accident Intensity`
+FROM roadrash
+)x
+GROUP BY 1
 ORDER BY 2 DESC;
 ```
 
